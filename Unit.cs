@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace genvsgen
 {
-    class Unit
+    abstract class Unit
     {
-        virtual public string Name { get; }
-        public int hp, hpmax, dmg_min, dmg_max;
+        public abstract string Name { get; }
+        public float Hpp { get { return ((float)hp) / hpmax; } }
+        public int hp, hpmax, dmg_min, dmg_max, level;
     }
 }

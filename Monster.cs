@@ -16,6 +16,9 @@ namespace genvsgen
             hp = hpmax = base_mon.hp;
             dmg_min = base_mon.dmg_min;
             dmg_max = base_mon.dmg_max;
+            level = base_mon.level;
         }
+
+        public override string Name { get { return base_mon.name; } }
     }
 }

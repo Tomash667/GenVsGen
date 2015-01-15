@@ -26,9 +26,50 @@ namespace genvsgen
 
                 foreach(Hero h in heroes)
                 {
-                    h.Tick();
-                    if(h.hp <= 0)
-                        Console.WriteLine("{0} dies.", h.name);
+                    switch (h.Think())
+                    {
+                        case Hero.ThinkResult.GoToCity:
+                            Console.WriteLine("{0} goes to city.", h.name);
+                            h.in_city = true;
+                            break;
+                        case Hero.ThinkResult.GoToDungeon:
+                            Console.WriteLine("{0} goes to dungeon.", h.name);
+                            h.in_city = false;
+                            break;
+                        case Hero.ThinkResult.Rest:
+                            Console.WriteLine("{0} rest in city.", h.name);
+                            h.hp += 10;
+                            if (h.hp > h.hpmax)
+                                h.hp = h.hpmax;
+                            break;
+                        case Hero.ThinkResult.ExploreDungeon:
+                            {
+                                int what = Utils.rnd.Next(4);
+                                switch(what)
+                                {
+                                    case 0:
+                                        Console.WriteLine("{0} wonders inside dungeon.", h.name);
+                                        break;
+                                    case 1:
+                                        Console.WriteLine("{0} get hurt by trap.", h.name);
+                                        h.hp -= Utils.rnd.Next(10, 40);
+                                        if(h.hp <= 0)
+                                            Console.WriteLine("{0} dies.", h.name);
+                                        break;
+                                    case 2:
+                                    case 3:
+                                        {
+                                            BaseMonster base_mon = BaseMonster.Monsters[Utils.rnd.Next(BaseMonster.Monsters.Length)];
+                                            Monster mon = new Monster(base_mon);
+                                            Console.WriteLine("{0} encounters {1}.", h.Name, mon.Name);
+                                            if (Combat.Fight(h, mon))
+                                                AddExpFor(h, mon.level);
+                                        }
+                                        break;
+                                }
+                            }
+                            break;
+                    }
                 }
 
                 heroes.RemoveAll(x => x.hp <= 0);
@@ -62,6 +103,26 @@ namespace genvsgen
                 }
                 
                 ++turn;
+            }
+        }
+
+        public void AddExpFor(Hero hero, int level)
+        {
+            int exp = 1000 + 250 * (level - hero.level);
+            if(exp > 0)
+            {
+                hero.exp += exp;
+                while(hero.exp >= hero.exp_need)
+                {
+                    hero.exp -= hero.exp_need;
+                    hero.exp_need += 1000;
+                    hero.hp += 5;
+                    hero.hpmax += 5;
+                    hero.dmg_min++;
+                    hero.dmg_max++;
+                    hero.level++;
+                    Console.WriteLine("{0} gained {1} level.", hero.Name, hero.level);
+                }
             }
         }
     }
